@@ -1,4 +1,4 @@
-<p align="center">
+ <p align="center">
   <img src="./goober_cover.png" width="500" alt="goober" />
 </p>
 
