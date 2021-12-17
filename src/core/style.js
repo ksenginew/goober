@@ -30,7 +30,7 @@ let argsToString = (args) => {
  * @param {Boolean} keyframes Keyframes mode. The input is the keyframes body that needs to be wrapped.
  * @returns {String}
  */
-let style = (args, props, target, global, append, keyframes) => {
+export let style = (args, props, target, global, append, keyframes) => {
   let input = argsToString(args);
 
   // Retrieve the className from cache or hash it in place
