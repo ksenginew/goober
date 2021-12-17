@@ -30,8 +30,8 @@ function styled(tag, forwardRef) {
       // Keep a local reference to the previous className
       let className = props.className || Styled.className;
 
-      // _ctx.p: is the props sent to the context
-      let props = Object.assign({ theme: useTheme && useTheme() }, props);
+      // the props sent to the context
+      let withTheme = Object.assign({ theme: useTheme && useTheme() }, props);
 
       // Set a flag if the current components had a previous className
       // similar to goober. This is the append/prepend flag
@@ -40,7 +40,7 @@ function styled(tag, forwardRef) {
 
       props.className =
         // Define the new className
-        style(args, props, ctx.taget, 0, append) +
+        style(args, withTheme, ctx.taget, 0, append) +
         (className ? " " + className : "");
 
       // If the forwardRef fun is defined we have the ref
