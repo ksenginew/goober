@@ -5,9 +5,9 @@ import { parse } from './parse';
  * @param {String} value
  * @param {Object} [props]
  */
-export let compile = (str, defs, data) => {
-    return str.reduce((out, next, i) => {
-        let tail = defs[i];
+export let compile = (args, data) => {
+    return args[0].reduce((out, next, i) => {
+        let tail = defs[(i + 1)];
 
         // If this is a function we need to:
         if (tail && tail.call) {
