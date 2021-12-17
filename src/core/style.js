@@ -2,8 +2,8 @@ import { hash } from "./hash";
 import { update } from "./update";
 import { stringify } from "./stringify";
 import { parse } from "./parse";
-import { compile } from "./core/compile";
-import { getSheet } from "./core/get-sheet";
+import { compile } from "./compile";
+import { getSheet } from "./get-sheet";
 
 /**
  * In-memory cache.
