@@ -1,13 +1,13 @@
-import { parse } from './parse';
+import { stringify } from './stringify';
 
 /**
  * Can parse a compiled string, from a tagged template
  * @param {String} value
  * @param {Object} [props]
  */
-export let compile = (str, defs, data) => {
-    return str.reduce((out, next, i) => {
-        let tail = defs[i];
+export let compile = (args, data) => {
+    return args[0].reduce((out, next, i) => {
+        let tail = defs[(i + 1)];
 
         // If this is a function we need to:
         if (tail && tail.call) {
@@ -27,7 +27,7 @@ export let compile = (str, defs, data) => {
             } else if (res && typeof res == 'object') {
                 // If `res` it's an object, we're either dealing with a vnode
                 // or an object returned from a function interpolation
-                tail = res.props ? '' : parse(res, '');
+                tail = res.props ? '' : stringify(res, '');
             } else {
                 // Regular value returned. Can be falsy as well.
                 // Here we check if this is strictly a boolean with false value

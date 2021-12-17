@@ -1,60 +1,77 @@
+let newRule =
+  /(?:([\u0080-\uFFFF\w-%@]+) *:? *([^{;]+?);|([^;}{]*?) *{)|(}\s*)/g;
+let ruleClean = /\/\*[^]*?\*\/|\s\s+|\n/g;
+
 /**
- * Parses the object into css, scoped, blocks
- * @param {Object} obj
- * @param {String} selector
- * @param {String} wrapper
+ * Parse CSS style string
+ * @param {String} val
+ * @returns {Object}
  */
-export let parse = (obj, selector) => {
-    let outer = '';
-    let blocks = '';
-    let current = '';
+export let parse = (val, parent) => {
+  let tree = [parent];
+  let current = "";
+  let outer = "";
+  let result = "";
+  let block;
 
-    for (let key in obj) {
-        let val = obj[key];
-
-        if (key[0] == '@') {
-            // If these are the `@` rule
-            if (key[1] == 'i') {
-                // Handling the `@import`
-                outer = key + ' ' + val + ';';
-            } else if (key[1] == 'f') {
-                // Handling the `@font-face` where the
-                // block doesn't need the brackets wrapped
-                blocks += parse(val, key);
-            } else {
-                // Regular at rule block
-                blocks += key + '{' + parse(val, key[1] == 'k' ? '' : selector) + '}';
-            }
-        } else if (typeof val == 'object') {
-            // Call the parse for this block
-            blocks += parse(
-                val,
-                selector
-                    ? // Go over the selector and replace the matching multiple selectors if any
-                      selector.replace(/([^,])+/g, (sel) => {
-                          // Return the current selector with the key matching multiple selectors if any
-                          return key.replace(/(^:.*)|([^,])+/g, (k) => {
-                              // If the current `k`(key) has a nested selector replace it
-                              if (/&/.test(k)) return k.replace(/&/g, sel);
-
-                              // If there's a current selector concat it
-                              return sel ? sel + ' ' + k : k;
-                          });
-                      })
-                    : key
-            );
-        } else if (val != undefined) {
-            // If this isn't an empty rule
-            key = key.replace(/[A-Z]/g, '-$&').toLowerCase();
-            // Push the line for this property
-            current += parse.p
-                ? // We have a prefixer and we need to run this through that
-                  parse.p(key, val)
-                : // Nope no prefixer just append it
-                  key + ':' + val + ';';
-        }
+  let rule = (selector) => {
+    if (selector && current) {
+      // Get at rules
+      let wrappers = tree.filter((rule) => rule[0] == "@");
+      // Add selector to wrappers
+      wrappers.unshift(selector);
+      // Wrap the declaration block with selector and at rules
+      wrappers.forEach((wrapper) => (current = wrapper + "{" + current + "}"));
+      // Append it to result
+      result += current;
+      // empty current declaration block
+      current = "";
     }
+  };
 
-    // If we have properties apply standard rule composition
-    return outer + (selector && current ? selector + '{' + current + '}' : current) + blocks;
+  while ((block = newRule.exec(val.replace(ruleClean, "")))) {
+    if (block[4]) {
+      // Remove the current entry
+      rule(tree.shift());
+    } else if (block[3]) {
+      rule(tree[0]);
+      let selector = block[3];
+      if (selector[0] != "@") {
+        // Get parent selector
+        parent = tree.find((value) => value[0] != "@");
+        if (parent)
+          selector =
+            // Go over the parent and replace the matching multiple selectors if any
+            parent.replace(/([^,])+/g, (sel) => {
+              // Return the current selector with the key matching multiple selectors if any
+              return selector.replace(/(^:.*)|([^,])+/g, (k) => {
+                // If the current `k`(key) has a nested selector replace it
+                if (/&/.test(k)) return k.replace(/&/g, sel);
+
+                // If there's a current selector concat it
+                return sel ? sel + " " + k : k;
+              });
+            });
+      }
+      tree.unshift(selector);
+    } else if (block[1][0] == "@") {
+      // Handling the `@import`
+      outer += block[1] + " " + block[2];
+    } else {
+      // If this isn't an empty rule
+      let property = block[1]
+        .replace(/_/g, "-")
+        .replace(/[A-Z]/g, "-$&")
+        .toLowerCase();
+      let value = block[2];
+      // Push the line for this property
+      current += parse.p
+        ? // We have a prefixer and we need to run this through that
+          parse.p(key, value)
+        : // Nope no prefixer just append it
+          key + ":" + value + ";";
+    }
+  }
+
+  return outer + result;
 };
