@@ -1,4 +1,4 @@
-import { hash } from "./to-hash";
+import { hash } from "./hash";
 import { update } from "./update";
 import { stringify } from "./stringify";
 import { parse } from "./parse";
