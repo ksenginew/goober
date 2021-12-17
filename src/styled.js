@@ -18,33 +18,35 @@ function setup(pragma, prefix, theme, forwardProps) {
  * @param {function} forwardRef
  */
 function styled(tag, forwardRef) {
-  let ctx = this || {};
+  let _ctx = this || {};
 
   return function wrapper() {
-    let args = arguments;
+    let _args = arguments;
 
     function Styled(props, ref) {
       // Grab a shallow copy of the props
-      let props = Object.assign({}, props);
+      let _props = Object.assign({}, props);
 
       // Keep a local reference to the previous className
-      let className = props.className || Styled.className;
+      let _previousClassName = _props.className || Styled.className;
 
-      // the props sent to the context
-      let withTheme = Object.assign({ theme: useTheme && useTheme() }, props);
+      // _ctx.p: is the props sent to the context
+      let withTheme = Object.assign({ theme: useTheme && useTheme() }, _props);
 
       // Set a flag if the current components had a previous className
       // similar to goober. This is the append/prepend flag
       // The _empty_ space compresses better than `\s`
-      let append = / *go\d+/.test(className);
+      let append = / *go\d+/.test(_previousClassName);
 
-      props.className =
+      _props.className =
         // Define the new className
-        style(args, withTheme, ctx.taget, 0, append) +
-        (className ? " " + className : "");
+        style(_args, withTheme, _ctx.target, 0, append) +
+        (_previousClassName ? " " + _previousClassName : "");
 
       // If the forwardRef fun is defined we have the ref
-      if (forwardRef) props.ref = ref;
+      if (forwardRef) {
+        _props.ref = ref;
+      }
 
       // Assign the _as with the provided `tag` value
       let _as = tag;
@@ -52,9 +54,9 @@ function styled(tag, forwardRef) {
       // If this is a string -- checking that is has a first valid char
       if (tag[0]) {
         // Try to assign the _as with the given _as value if any
-        _as = props.as || tag;
+        _as = _props.as || tag;
         // And remove it
-        delete props.as;
+        delete _props.as;
       }
 
       // Handle the forward props filter if defined and _as is a string
@@ -62,7 +64,7 @@ function styled(tag, forwardRef) {
         fwdProp(_props);
       }
 
-      return h(_as, props);
+      return h(_as, _props);
     }
 
     return forwardRef ? forwardRef(Styled) : Styled;
