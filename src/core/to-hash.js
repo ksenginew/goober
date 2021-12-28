@@ -9,7 +9,7 @@
  */
 export let toHash = (str) => {
     let i = 0,
-        out = 11;
-    while (i < str.length) out = (101 * out + str.charCodeAt(i++)) >>> 0;
-    return 'go' + out;
+        out = 0;
+    while (i < str.length) out = (out + str.charCodeAt(i++) * i) >>> 0;
+    return 'go' + out.toString(36);
 };
